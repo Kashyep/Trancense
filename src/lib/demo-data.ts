@@ -1,0 +1,82 @@
+import type { PilotState } from './types'
+
+export const demoState: PilotState = {
+  workspace: {
+    id: 'workspace-demo',
+    name: 'Aranya Energy Consulting',
+    slug: 'aranya-energy-consulting',
+    countryCode: 'IN',
+    currency: 'INR',
+    timezone: 'Asia/Kolkata',
+    isDemo: true,
+  },
+  site: {
+    id: 'site-demo',
+    name: 'Kaveri Business Campus',
+    address: '42 Residency Road',
+    city: 'Bengaluru',
+    state: 'Karnataka',
+    postalCode: '560025',
+    country: 'India',
+  },
+  facility: {
+    id: 'facility-demo',
+    siteId: 'site-demo',
+    name: 'Admin and Learning Centre',
+    type: 'Educational / office facility',
+    floorArea: 18500,
+    floorAreaUnit: 'm2',
+    occupancy: 620,
+    operatingHours: 11,
+    driverName: 'Occupied floor area',
+    driverUnit: 'm²',
+  },
+  audit: {
+    id: 'audit-pilot',
+    siteId: 'site-demo',
+    facilityId: 'facility-demo',
+    name: 'FY2025-26 Energy Performance Assessment',
+    objective: 'Establish a traceable energy baseline and prioritize practical efficiency actions.',
+    periodStart: '2025-04-01',
+    periodEnd: '2026-03-31',
+    scope: 'Electricity use for the admin and learning centre, including HVAC, lighting, and plug loads.',
+    boundary: 'Facility electricity meter EB-01, Apr 2025–Mar 2026',
+    status: 'active',
+    reviewState: 'draft',
+  },
+  evidence: [
+    {
+      id: 'evidence-demo-bill',
+      auditId: 'audit-pilot',
+      filename: 'BESCOM_April_2025_bill.pdf',
+      documentType: 'Utility bill',
+      source: 'BESCOM',
+      period: 'April 2025',
+      mimeType: 'application/pdf',
+      sizeBytes: 184320,
+      reviewState: 'approved',
+      isDemo: true,
+    },
+  ],
+  energyRecords: [
+    { id: 'energy-apr', auditId: 'audit-pilot', facilityId: 'facility-demo', evidenceId: 'evidence-demo-bill', period: '2025-04', source: 'electricity', rawQuantity: 128400, rawUnit: 'kWh', normalizedQuantity: 128400, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1185200, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+    { id: 'energy-may', auditId: 'audit-pilot', facilityId: 'facility-demo', period: '2025-05', source: 'electricity', rawQuantity: 121800, rawUnit: 'kWh', normalizedQuantity: 121800, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1124000, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+    { id: 'energy-jun', auditId: 'audit-pilot', facilityId: 'facility-demo', period: '2025-06', source: 'electricity', rawQuantity: 116200, rawUnit: 'kWh', normalizedQuantity: 116200, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1072500, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+    { id: 'energy-jul', auditId: 'audit-pilot', facilityId: 'facility-demo', period: '2025-07', source: 'electricity', rawQuantity: 119700, rawUnit: 'kWh', normalizedQuantity: 119700, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1104800, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+    { id: 'energy-aug', auditId: 'audit-pilot', facilityId: 'facility-demo', period: '2025-08', source: 'electricity', rawQuantity: 124900, rawUnit: 'kWh', normalizedQuantity: 124900, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1152800, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+    { id: 'energy-sep', auditId: 'audit-pilot', facilityId: 'facility-demo', period: '2025-09', source: 'electricity', rawQuantity: 118500, rawUnit: 'kWh', normalizedQuantity: 118500, normalizedUnit: 'kWh', normalizationStatus: 'not-required', totalCost: 1093600, unitRate: 9.23, fixedCharge: 0, costMethod: 'direct-total', dataQuality: 'bill-derived', reviewState: 'approved' },
+  ],
+  factors: [
+    { id: 'factor-demo-grid', name: 'Demo grid electricity factor', source: 'electricity', unitFrom: 'kWh', unitTo: 'kgCO₂e', value: 0.71, sourceName: 'Demo value — replace with approved CEA factor', sourceUrl: '', vintage: 'demo', status: 'demo', notes: 'Not authoritative. Configure an approved factor before customer reporting.' },
+  ],
+  equipment: [
+    { id: 'equipment-demo-hvac', facilityId: 'facility-demo', name: 'Rooftop HVAC units', category: 'HVAC', location: 'Learning Centre roof', quantity: 8, capacity: 45, capacityUnit: 'TR', operatingHours: 2800, installationYear: 2019, efficiency: 'Mixed, no central controls', condition: 'fair', dataQuality: 'user-entered', notes: 'Candidate for sequencing and controls review.' },
+    { id: 'equipment-demo-lighting', facilityId: 'facility-demo', name: 'Interior lighting', category: 'Lighting', location: 'All occupied areas', quantity: 860, capacity: 18, capacityUnit: 'W per fitting', operatingHours: 3000, installationYear: 2017, efficiency: 'LED retrofit incomplete', condition: 'fair', dataQuality: 'user-entered' },
+  ],
+  findings: [
+    { id: 'finding-demo-hvac', auditId: 'audit-pilot', title: 'HVAC schedules are not aligned to occupancy', category: 'Operations', problemStatement: 'Cooling operation extends beyond the observed occupancy window.', observation: 'Site interview and operating schedule review indicate recurring early start and late shutdown.', evidenceIds: ['evidence-demo-bill'], confidence: 'medium', status: 'draft' },
+  ],
+  recommendations: [
+    { id: 'recommendation-demo-hvac', auditId: 'audit-pilot', findingId: 'finding-demo-hvac', title: 'Tune HVAC schedules and sequencing', intervention: 'Align start/stop schedules to occupied hours and sequence rooftop units by demand.', affectedSystem: 'HVAC', annualEnergySavings: 42000, annualCostSavings: 387660, implementationCost: 650000, simplePayback: 1.68, confidence: 'medium', assumptions: 'Savings are an initial estimate based on operating-hour reduction and current blended rate.', dependencies: 'Facilities team access to controls and operating schedule approval.', risks: 'Comfort complaints if schedules are changed without zone-level review.', owner: 'Facility Manager', dueDate: '2026-09-30', priority: 'high', status: 'under-review' },
+  ],
+}
