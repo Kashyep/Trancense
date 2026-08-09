@@ -1,2 +1,1 @@
-import { AuthForm } from '@/components/auth-form'
-export default function SignInPage() { return <AuthForm mode="sign-in"/> }
+import { AuthForm } from "@/components/auth-form"; export default function SignIn(){return <main className="flex min-h-screen items-center justify-center bg-[#efefef] p-5"><AuthForm mode="sign-in"/></main>}

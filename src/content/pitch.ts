@@ -1,0 +1,1 @@
+export const pitchContent = { demoLabel: "Illustrative product mockup — not customer data", capabilities: ["Private evidence metadata and time-limited access", "Role-scoped review workflows", "Approved-input calculation rules", "Authorized draft PDF exports"] } as const;
