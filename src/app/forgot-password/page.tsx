@@ -1,2 +1,1 @@
-import { AuthForm } from '@/components/auth-form'
-export default function ForgotPasswordPage() { return <AuthForm mode="forgot"/> }
+import { AuthForm } from "@/components/auth-form"; export default function Forgot(){return <main className="flex min-h-screen items-center justify-center bg-[#efefef] p-5"><AuthForm mode="forgot"/></main>}

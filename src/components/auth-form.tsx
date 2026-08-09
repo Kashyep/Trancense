@@ -1,38 +1,6 @@
-'use client'
-
-import Link from 'next/link'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
-
-type Mode = 'sign-in' | 'sign-up' | 'forgot'
-
-export function AuthForm({ mode }: { mode: Mode }) {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [message, setMessage] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  const copy = mode === 'sign-in' ? { title: 'Welcome back', subtitle: 'Continue your audit workspace.', button: 'Sign in' } : mode === 'sign-up' ? { title: 'Start your pilot', subtitle: 'Create a workspace for your first facility assessment.', button: 'Create account' } : { title: 'Reset your password', subtitle: 'We will send a recovery link if the account exists.', button: 'Send recovery link' }
-
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); setBusy(true); setMessage('')
-    const supabase = createSupabaseBrowserClient()
-    if (!supabase) {
-      setMessage('Supabase is not configured in this environment. Opening the clearly labelled local demo workspace.')
-      window.setTimeout(() => router.push('/dashboard'), 600)
-      return
-    }
-    const result = mode === 'sign-in' ? await supabase.auth.signInWithPassword({ email, password }) : mode === 'sign-up' ? await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } }) : await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` })
-    if (result.error) setMessage(result.error.message)
-    else if (mode === 'forgot') setMessage('Check your email for the recovery link.')
-    else router.push('/dashboard')
-    setBusy(false)
-  }
-
-  return <div className="auth-page"><div className="auth-card"><Link href="/" className="brand"><span className="brand-mark"/>Trancense</Link><div style={{ marginTop: 30 }}><p className="eyebrow">Audit Workspace</p><h1>{copy.title}</h1><p className="auth-subtitle">{copy.subtitle}</p></div>{message && <Notice>{message}</Notice>}<form className="form-stack" onSubmit={submit}>{mode === 'sign-up' && <div className="field"><label htmlFor="name">Full name</label><input id="name" required value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name"/></div>}<div className="field"><label htmlFor="email">Email</label><input id="email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com"/></div>{mode !== 'forgot' && <div className="field"><label htmlFor="password">Password</label><input id="password" type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters"/></div>}<button className="button button-primary" disabled={busy} type="submit">{busy ? 'Working…' : copy.button}</button></form>{mode === 'sign-in' && <div className="auth-foot"><Link href="/forgot-password">Forgot password?</Link></div>}{mode !== 'forgot' && <div className="auth-foot">{mode === 'sign-in' ? <>New to Trancense? <Link href="/sign-up">Create an account</Link></> : <>Already have an account? <Link href="/sign-in">Sign in</Link></>}</div>}{mode === 'forgot' && <div className="auth-foot"><Link href="/sign-in">Return to sign in</Link></div>}<div className="auth-foot" style={{ marginTop: 25 }}>Results require human review. Trancense is not a certified regulatory submission tool.</div></div></div>
-}
-
-function Notice({ children }: { children: React.ReactNode }) { return <div className="notice notice-warning" style={{ marginTop: 18 }}><div>!</div><div><strong>Configuration notice</strong><p>{children}</p></div></div> }
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/browser";
+import { Button } from "@/components/ui";
+export function AuthForm({mode}:{mode:"sign-in"|"sign-up"|"forgot"|"reset"}) { const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false); const [show,setShow]=useState(false); async function submit(formData:FormData){setBusy(true);setMessage("");try{const client=createClient(); const email=String(formData.get("email")||""); const password=String(formData.get("password")||""); if(mode==='sign-in'){const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;location.assign('/app');} else if(mode==='sign-up'){const {error}=await client.auth.signUp({email,password,options:{emailRedirectTo:`${location.origin}/auth/callback`}});if(error)throw error;setMessage('Check your email to confirm your account.');} else if(mode==='forgot'){await client.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}/reset-password`});setMessage('If an account exists, a reset link has been sent.');} else {const {error}=await client.auth.updateUser({password});if(error)throw error;setMessage('Password updated. You can now sign in.');}}catch(error){setMessage(error instanceof Error?error.message:'Something went wrong. Try again.')}finally{setBusy(false)}} const title=mode==='sign-in'?'Welcome back':mode==='sign-up'?'Start a careful audit':'Reset your password'; return <form action={submit} className="utility-card w-full max-w-md p-7 sm:p-10" aria-describedby="auth-status"><h1 className="text-4xl">{title}</h1><p className="mt-3 muted">Use your work email. Trancense supports human-reviewed audit decisions.</p>{mode!=="reset"&&<label className="mt-6 block text-sm font-semibold">Email<input required name="email" type="email" className="mt-2 w-full border border-[#e8e8e8] bg-white p-3" autoComplete="email" /></label>}{mode!=="forgot"&&<label className="mt-5 block text-sm font-semibold">Password<div className="mt-2 flex border border-[#e8e8e8] bg-white"><input required minLength={8} name="password" type={show?'text':'password'} className="min-w-0 flex-1 p-3" autoComplete={mode==='sign-in'?'current-password':'new-password'}/><button type="button" onClick={()=>setShow(!show)} className="px-3 text-sm text-[#816729]" aria-label={show?'Hide password':'Show password'}>{show?'Hide':'Show'}</button></div></label>}<Button disabled={busy} className="mt-6 w-full">{busy?'Please wait…':mode==='sign-in'?'Sign in':mode==='sign-up'?'Create account':mode==='forgot'?'Send reset link':'Save new password'}</Button><p id="auth-status" role="status" className="mt-4 text-sm muted">{message}</p><p className="mt-5 text-sm">{mode==='sign-in'?<><Link className="text-[#816729]" href="/forgot-password">Forgot password?</Link> · <Link className="text-[#816729]" href="/sign-up">Create account</Link></>:<Link className="text-[#816729]" href="/sign-in">Back to sign in</Link>}</p></form> }

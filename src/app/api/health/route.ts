@@ -1,17 +1,5 @@
-import { NextResponse } from 'next/server'
-import { isSupabaseConfigured } from '@/lib/supabase/server'
-
-export const dynamic = 'force-dynamic'
-
-export async function GET() {
-  const configured = isSupabaseConfigured()
-  return NextResponse.json({
-    status: 'ok',
-    version: '0.1.0',
-    application: 'ok',
-    database: configured ? 'configured' : 'not-configured',
-    storage: configured ? 'configured' : 'not-configured',
-    ai: process.env.AI_API_KEY ? 'configured' : 'not-configured',
-    note: configured ? 'Supabase configuration detected; verify migrations and policies.' : 'Core demo mode is available. Configure Supabase for real authentication and persistence.',
-  })
-}
+import { NextResponse } from "next/server";
+import { supabaseConfigured } from "@/lib/env";
+export const dynamic='force-dynamic';
+/** Deliberately unauthenticated and non-diagnostic: suitable for platform liveness checks. */
+export async function GET() { return NextResponse.json({ status: supabaseConfigured ? "ok" : "misconfigured", version: process.env.npm_package_version ?? "0.1" }, { status: supabaseConfigured ? 200 : 503, headers: { "Cache-Control": "no-store" } }); }
