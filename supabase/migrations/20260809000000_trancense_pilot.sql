@@ -27,16 +27,34 @@ revoke all on function public.is_workspace_member(uuid, public.workspace_role) f
 grant execute on function public.is_workspace_member(uuid, public.workspace_role) to authenticated;
 create or replace function public.handle_new_user() returns trigger language plpgsql security definer set search_path = public as $$ begin insert into public.profiles(id, full_name) values(new.id, coalesce(new.raw_user_meta_data->>'full_name','')); return new; end; $$;
 create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
-create or replace function public.create_pilot_workspace(workspace_name text) returns uuid language plpgsql security definer set search_path = public as $$ declare new_id uuid; begin if auth.uid() is null then raise exception 'Unauthenticated'; end if exists(select 1 from public.workspace_memberships where user_id=auth.uid()) then raise exception 'Pilot workspace limit reached'; end if; insert into public.workspaces(name,created_by) values(workspace_name,auth.uid()) returning id into new_id; insert into public.workspace_memberships(workspace_id,user_id,role) values(new_id,auth.uid(),'owner'); insert into public.audit_events(workspace_id,entity_type,action,actor_id) values(new_id,'workspace','created',auth.uid()); return new_id; end; $$;
+create or replace function public.create_pilot_workspace(workspace_name text) returns uuid language plpgsql security definer set search_path = public as $$ declare new_id uuid; begin if auth.uid() is null then raise exception 'Unauthenticated'; end if; if exists(select 1 from public.workspace_memberships where user_id=auth.uid()) then raise exception 'Pilot workspace limit reached'; end if; insert into public.workspaces(name,created_by) values(workspace_name,auth.uid()) returning id into new_id; insert into public.workspace_memberships(workspace_id,user_id,role) values(new_id,auth.uid(),'owner'); insert into public.audit_events(workspace_id,entity_type,action,actor_id) values(new_id,'workspace','created',auth.uid()); return new_id; end; $$;
 revoke all on function public.create_pilot_workspace(text) from public; grant execute on function public.create_pilot_workspace(text) to authenticated;
 
 -- RLS uses only membership rows; never user metadata/JWT role claims.
 alter table public.profiles enable row level security;
 create policy "profiles self" on public.profiles for all to authenticated using (id=(select auth.uid())) with check (id=(select auth.uid()));
-do $$ declare t text; begin foreach t in array array['workspaces','workspace_memberships','sites','facilities','audits','reporting_boundaries','evidence_documents','conversion_factors','tariff_assumptions','energy_records','equipment','calculations','findings','recommendations','audit_events','report_exports'] loop execute format('alter table public.%I enable row level security',t); execute format('create policy "read member %s" on public.%I for select to authenticated using (public.is_workspace_member(workspace_id,''viewer''))',t,t); execute format('create policy "write editor %s" on public.%I for insert to authenticated with check (public.is_workspace_member(workspace_id,''editor''))',t,t); execute format('create policy "update editor %s" on public.%I for update to authenticated using (public.is_workspace_member(workspace_id,''editor'')) with check (public.is_workspace_member(workspace_id,''editor''))',t,t); execute format('create policy "delete owner %s" on public.%I for delete to authenticated using (public.is_workspace_member(workspace_id,''owner''))',t,t); end loop; end $$;
--- Membership and workspace changes remain owner-only after bootstrap; use a server RPC/transaction for initial workspace creation.
-drop policy "write editor workspace_memberships" on public.workspace_memberships; drop policy "update editor workspace_memberships" on public.workspace_memberships;
+do $$
+declare t text;
+begin
+  foreach t in array array['sites','facilities','audits','reporting_boundaries','evidence_documents','conversion_factors','tariff_assumptions','energy_records','equipment','calculations','findings','recommendations','audit_events','report_exports']
+  loop
+    execute format('alter table public.%I enable row level security',t);
+    execute format('create policy "read member %s" on public.%I for select to authenticated using (public.is_workspace_member(workspace_id,''viewer''))',t,t);
+    execute format('create policy "write editor %s" on public.%I for insert to authenticated with check (public.is_workspace_member(workspace_id,''editor''))',t,t);
+    execute format('create policy "update editor %s" on public.%I for update to authenticated using (public.is_workspace_member(workspace_id,''editor'')) with check (public.is_workspace_member(workspace_id,''editor''))',t,t);
+    execute format('create policy "delete owner %s" on public.%I for delete to authenticated using (public.is_workspace_member(workspace_id,''owner''))',t,t);
+  end loop;
+end $$;
+
+alter table public.workspaces enable row level security;
+create policy "read member workspaces" on public.workspaces for select to authenticated using (public.is_workspace_member(id,'viewer'));
+create policy "update owner workspaces" on public.workspaces for update to authenticated using (public.is_workspace_member(id,'owner')) with check (public.is_workspace_member(id,'owner'));
+create policy "delete owner workspaces" on public.workspaces for delete to authenticated using (public.is_workspace_member(id,'owner'));
+
+alter table public.workspace_memberships enable row level security;
+create policy "read member memberships" on public.workspace_memberships for select to authenticated using (public.is_workspace_member(workspace_id,'viewer'));
 create policy "manage members as owner" on public.workspace_memberships for all to authenticated using (public.is_workspace_member(workspace_id,'owner')) with check (public.is_workspace_member(workspace_id,'owner'));
+-- Membership and workspace changes remain owner-only after bootstrap; use a server RPC/transaction for initial workspace creation.
 drop policy "write editor conversion_factors" on public.conversion_factors; drop policy "update editor conversion_factors" on public.conversion_factors;
 create policy "manage factors as owner" on public.conversion_factors for all to authenticated using (public.is_workspace_member(workspace_id,'owner')) with check (public.is_workspace_member(workspace_id,'owner'));
 drop policy "write editor tariff_assumptions" on public.tariff_assumptions; drop policy "update editor tariff_assumptions" on public.tariff_assumptions;
