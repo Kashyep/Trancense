@@ -1,0 +1,5 @@
+period_start,period_end,source,quantity,unit,cost_inr,notes
+2026-01-01,2026-01-31,electricity,120000,kWh,840000,Fictional jury-demo source register
+2026-02-01,2026-02-28,electricity,118000,kWh,826000,Fictional jury-demo source register
+2026-03-01,2026-03-31,electricity,125000,kWh,875000,Fictional jury-demo source register
+2026-03-15,2026-03-31,diesel,4200,L,,Missing approved factor; should remain excluded
