@@ -29,7 +29,7 @@ function dateLabel(value: string | null | undefined) {
 }
 
 function PageHeader({ auditName, boundaryName, page }: { auditName: string; boundaryName: string; page: { title: string; description: string } }) {
-  return <><p className="text-sm font-bold text-[#816729]">{auditName} · {boundaryName}</p><h1 className="mt-3 text-5xl">{page.title}</h1><p className="mt-4 max-w-2xl muted">{page.description}</p></>;
+  return <header className="app-page-header"><div><p className="kicker">{auditName} · {boundaryName}</p><h1 className="mt-3">{page.title}</h1></div><p className="max-w-md">{page.description}</p></header>;
 }
 
 export default async function WorkspacePage({ params }: { params: Promise<{ section: string }> }) {
@@ -80,5 +80,5 @@ export default async function WorkspacePage({ params }: { params: Promise<{ sect
     content = <EmptyState title={`No ${page.title.toLowerCase()} yet`}>{page.description} This screen is ready for records created through the secured workspace workflow.</EmptyState>;
   }
 
-  return <AppShell workspace={c.workspaceName} role={c.role}><main className="page-pad p-8"><PageHeader auditName={c.audit.name} boundaryName={c.boundary.name} page={page} /><div className="mt-8">{content}</div></main></AppShell>;
+  return <AppShell workspace={c.workspaceName} role={c.role}><main className="page-pad"><PageHeader auditName={c.audit.name} boundaryName={c.boundary.name} page={page} /><div>{content}</div></main></AppShell>;
 }

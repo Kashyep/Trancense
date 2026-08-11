@@ -83,9 +83,22 @@ Public routes: landing/auth/reset/contact and `/api/health`. Protected surfaces:
 - Attack preconditions: Deployed vulnerable dependency path.
 - Evidence: Baseline `npm audit --omit=dev` reported three high dependency paths. 
 - Impact: Framework/build-path information disclosure or denial of service.
-- Fix: Updated Next.js to `15.5.21`, pinned/overrode PostCSS to patched `8.5.26`, and Sharp to `0.35.0` through the lockfile override.
+- Fix: Updated Next.js to `15.5.21`, pinned/overrode PostCSS to patched `8.5.26`, and Sharp to `0.35.0` through the lockfile override. The override was made explicit rather than relying on an unresolved npm `$postcss` reference.
 - Regression test: Final production-only audit reports **0 high and 0 critical** findings.
 - Detection/monitoring: Run production dependency audit in CI and block high/critical findings.
+- Status: fixed.
+
+## [SEC-008] Vitest UI server advisory in local development tooling
+
+- Severity: Critical
+- CVSS 3.1: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H (9.8)
+- Affected component: `package.json` / `package-lock.json` development dependency `vitest@3.2.4`
+- Attack preconditions: A developer exposes the Vitest UI server to an untrusted network.
+- Evidence: Local `npm audit` reported GHSA-5xrq-8626-4rwp for Vitest versions below `3.2.6`.
+- Impact: An exposed development test UI could allow arbitrary local file reads and code execution.
+- Fix: Updated Vitest to `3.2.6`. The checked-in test command remains non-UI (`vitest run`).
+- Regression test: `npm audit` no longer reports a critical finding; `npm test` passes with Vitest `3.2.6`.
+- Detection/monitoring: CI should reject high/critical audit findings and developers should never expose the test UI outside localhost.
 - Status: fixed.
 
 ## [SEC-007] Findings and recommendations could bypass review state machines

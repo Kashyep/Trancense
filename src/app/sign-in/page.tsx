@@ -1,1 +1,1 @@
-import { AuthForm } from "@/components/auth-form"; export default function SignIn(){return <main className="flex min-h-screen items-center justify-center bg-[#efefef] p-5"><AuthForm mode="sign-in"/></main>}
+import { AuthForm } from "@/components/auth-form"; import { AuthLayout } from "@/components/auth-layout"; export default function SignIn(){return <AuthLayout eyebrow="Secure access"><AuthForm mode="sign-in"/></AuthLayout>}
