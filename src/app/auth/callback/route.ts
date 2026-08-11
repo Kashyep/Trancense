@@ -20,8 +20,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Email confirmation creates a Supabase session. Clear it so the user must
-  // explicitly sign in before entering onboarding or the workspace.
+  // Confirmation creates a temporary Supabase session. Clear it so the user
+  // must explicitly sign in before entering onboarding or the workspace.
   await supabase.auth.signOut();
   signInUrl.searchParams.set("verified", "1");
   return NextResponse.redirect(signInUrl);
