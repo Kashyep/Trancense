@@ -1,6 +1,5 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { currentUser } from "@/lib/supabase/server";
 import { normalizeToKwh } from "@/domain/calculations";
@@ -15,37 +14,8 @@ function safeActionMessage(error: unknown, fallback: string) { if (error instanc
 const allowedRoles:Record<Role,Role[]>={viewer:["viewer","reviewer","editor","owner"],reviewer:["reviewer","owner"],editor:["editor","owner"],owner:["owner"]};
 async function access(workspaceId:string, minimum:Role="viewer"){const {client,user}=await currentUser();const {data,error}=await client.from("workspace_memberships").select("role").eq("workspace_id",workspaceId).eq("user_id",user.id).single();const role=data?.role as Role|undefined;if(error||!role||!allowedRoles[minimum].includes(role))throw new Error("You do not have permission to perform that action.");return {client,user,role};}
 async function event(client:any, workspaceId:string, auditId:string|null, entityType:string, entityId:string|undefined, action:string, actorId:string, details:Record<string,unknown>={}){const {error}=await client.rpc("record_audit_event",{target_workspace:workspaceId,target_audit:auditId,target_entity_type:entityType,target_entity_id:entityId??null,target_action:action,target_details:details});if(error)throw new Error("Could not record audit history.");}
-const workspaceSchema=z.object({workspaceName:z.string().trim().min(2).max(120),siteName:z.string().trim().min(2).max(120)});
-export async function createWorkspace(_:unknown, formData:FormData){
-  let createdWorkspaceId:string|null=null;
-  let cleanupClient:Awaited<ReturnType<typeof currentUser>>["client"]|null=null;
-  try{
-    await assertActionOrigin();
-    const input=workspaceSchema.parse({workspaceName:formData.get("workspaceName"),siteName:formData.get("siteName")});
-    const {client,user}=await currentUser();
-    cleanupClient=client;
-    const {data:workspaceId,error}=await client.rpc("create_pilot_workspace",{workspace_name:input.workspaceName});
-    if(error||!workspaceId)throw new Error(error?.message?.includes("limit")?"Pilot limit reached: one workspace is available per user. Contact support to expand.":"Could not create workspace.");
-    createdWorkspaceId=z.string().uuid().parse(workspaceId);
-    const year=new Date().getFullYear();
-    const periodStart=`${year}-01-01`;
-    const periodEnd=`${year}-12-31`;
-    const {data:site,error:siteError}=await client.from("sites").insert({workspace_id:createdWorkspaceId,name:input.siteName,created_by:user.id,country_code:"IN"}).select("id").single();
-    if(siteError)throw siteError;
-    const {data:facility,error:facilityError}=await client.from("facilities").insert({workspace_id:createdWorkspaceId,site_id:site.id,name:`${input.siteName} Facility`,facility_type:"General",created_by:user.id}).select("id").single();
-    if(facilityError)throw facilityError;
-    const {data:audit,error:auditError}=await client.from("audits").insert({workspace_id:createdWorkspaceId,facility_id:facility.id,name:`${input.siteName} Energy Audit`,objective:"Establish a reviewable energy baseline for this site.",period_start:periodStart,period_end:periodEnd,status:"active",created_by:user.id}).select("id").single();
-    if(auditError)throw auditError;
-    const {error:boundaryError}=await client.from("reporting_boundaries").insert({workspace_id:createdWorkspaceId,audit_id:audit.id,name:"Whole facility",scope_description:`Initial reporting boundary for ${input.siteName}.`,frequency:"monthly",period_start:periodStart,period_end:periodEnd,created_by:user.id});
-    if(boundaryError)throw boundaryError;
-    await event(client,createdWorkspaceId,audit.id,"audit",audit.id,"onboarding_completed",user.id);
-    revalidatePath("/app");
-  }catch(error){
-    if(createdWorkspaceId&&cleanupClient)await cleanupClient.from("workspaces").delete().eq("id",createdWorkspaceId);
-    return {ok:false,error:safeActionMessage(error,"Could not create workspace.")};
-  }
-  redirect("/app");
-}
+const workspaceSchema=z.object({name:z.string().trim().min(2).max(120)});
+export async function createWorkspace(_:unknown, formData:FormData){try{await assertActionOrigin();const input=workspaceSchema.parse({name:formData.get("name")});const {client}=await currentUser();const {error}=await client.rpc("create_pilot_workspace",{workspace_name:input.name});if(error)throw new Error(error.message.includes("limit")?"Pilot limit reached: one workspace is available per user. Contact support to expand.":"Could not create workspace.");revalidatePath("/onboarding");return {ok:true};}catch(error){return {ok:false,error:safeActionMessage(error,"Could not create workspace.")};}}
 const setupSchema=z.object({workspaceId:z.string().uuid(),siteName:z.string().min(2),facilityName:z.string().min(2),auditName:z.string().min(2),objective:z.string().min(4),periodStart:z.string(),periodEnd:z.string(),area:z.coerce.number().positive(),scope:z.string().min(4)});
 export async function completeSetup(_:unknown,formData:FormData){try{await assertActionOrigin();const v=setupSchema.parse(Object.fromEntries(formData));const {client,user}=await access(v.workspaceId,"owner");const {data:site,error:siteError}=await client.from("sites").insert({workspace_id:v.workspaceId,name:v.siteName,created_by:user.id,country_code:"IN"}).select().single();if(siteError)throw siteError;const {data:facility,error:facilityError}=await client.from("facilities").insert({workspace_id:v.workspaceId,site_id:site.id,name:v.facilityName,floor_area:v.area,created_by:user.id}).select().single();if(facilityError)throw facilityError;const {data:audit,error:auditError}=await client.from("audits").insert({workspace_id:v.workspaceId,facility_id:facility.id,name:v.auditName,objective:v.objective,period_start:v.periodStart,period_end:v.periodEnd,created_by:user.id}).select().single();if(auditError)throw auditError;const {error:boundaryError}=await client.from("reporting_boundaries").insert({workspace_id:v.workspaceId,audit_id:audit.id,name:"Whole facility",scope_description:v.scope,period_start:v.periodStart,period_end:v.periodEnd,area:v.area,created_by:user.id});if(boundaryError)throw boundaryError;await event(client,v.workspaceId,audit.id,"audit",audit.id,"onboarding_completed",user.id);revalidatePath("/app");return {ok:true};}catch(error){return {ok:false,error:safeActionMessage(error,"Could not save setup.")};}}
 const energySchema=z.object({workspaceId:z.string().uuid(),auditId:z.string().uuid(),boundaryId:z.string().uuid(),periodStart:z.string(),periodEnd:z.string(),source:z.enum(["electricity","diesel","petrol","lpg","natural_gas","renewable","other"]),quantity:z.coerce.number().nonnegative(),unit:z.string().min(1),cost:z.coerce.number().nonnegative().optional(),notes:z.string().max(2000).optional()});

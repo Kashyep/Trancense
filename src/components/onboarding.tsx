@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { completeSetup, createWorkspace } from "@/app/actions";
 import { Button } from "@/components/ui";
 
@@ -8,14 +9,18 @@ const initial = { ok: false, error: "" };
 
 export function CreateWorkspace() {
   const [state, action, pending] = useActionState(createWorkspace, initial);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.ok) router.refresh();
+  }, [router, state.ok]);
 
   return <form action={action} className="auth-card">
-    <p className="kicker">Step 1 of 1 · Workspace</p>
-    <h1 className="mt-3">Set up your workspace.</h1>
-    <p className="mt-3 muted">Enter your workspace and primary site. A starter audit boundary will be created automatically.</p>
-    <label className="form-label">Workspace name<input name="workspaceName" required minLength={2} className="form-input" placeholder="e.g. Meridian Energy Audit" /></label>
-    <label className="form-label">Site name<input name="siteName" required minLength={2} className="form-input" placeholder="e.g. Pune Manufacturing Campus" /></label>
-    <Button disabled={pending} className="mt-6 w-full">{pending ? "Creating workspace…" : "Enter workspace"}</Button>
+    <p className="kicker">Step 1 of 2 · Workspace</p>
+    <h1 className="mt-3">Name your workspace.</h1>
+    <p className="mt-3 muted">Create the workspace first, then set its primary site and reporting boundary.</p>
+    <label className="form-label">Workspace name<input name="name" required minLength={2} className="form-input" placeholder="e.g. Meridian Energy Audit" /></label>
+    <Button disabled={pending} className="mt-6 w-full">{pending ? "Creating workspace…" : "Continue to audit setup"}</Button>
     {state.error && <p role="alert" className="field-error mt-4">{state.error}</p>}
   </form>;
 }
