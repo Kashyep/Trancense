@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
 
 const pages: Record<string, { title: string; description: string }> = {
   setup: { title: "Site & audit setup", description: "The active reporting boundary flows into every calculation and report." },
-  evidence: { title: "Evidence & documents", description: "Private evidence is never automatically approved data." },
-  energy: { title: "Energy data", description: "Preserve original input and units, then review compatible records." },
+  evidence: { title: "Documents", description: "Private documents are never automatically approved data." },
+  energy: { title: "Add & review data", description: "Add a monthly reading in one save, then review compatible records." },
   equipment: { title: "Equipment", description: "Inventory equipment with source links and data-quality context." },
   analysis: { title: "Analysis & KPIs", description: "Every KPI is reproducible from approved compatible inputs." },
   findings: { title: "Findings", description: "Observations require evidence, confidence, and human review." },
