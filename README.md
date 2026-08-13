@@ -2,6 +2,19 @@
 
 Evidence-first energy-audit software for Indian audit teams. Trancense is decision support: it does not certify an audit, determine compliance, or guarantee savings.
 
+## Product workflow
+
+After sign-in and onboarding, the workspace is organized around a short audit loop:
+
+1. Add a monthly bill or meter reading in one form, or import up to 500 monthly rows from a CSV.
+2. Review draft readings before they enter trusted calculations.
+3. Use approved data in analysis, findings, recommendations, and draft reports.
+4. Add supporting evidence, equipment, and preliminary solar scenarios as the audit progresses.
+
+The post-login navigation keeps the primary workflow visible—Dashboard, Data, Analyse, Actions, and Reports. Secondary tools are grouped under “More tools” so the workspace stays focused on the next audit decision.
+
+CSV imports retain the original file as private evidence. Supported columns include `month` (or `billing_month`), `quantity` (or `kwh`), and optional `source`, `unit`, `cost`, `provider`, and `notes`.
+
 ## Local setup
 
 1. Use Node 22 LTS for local verification and deployment. The checked-in Supabase CLI version requires Node 22; some lint and browser tooling also no longer supports Node 18.
@@ -36,10 +49,12 @@ The seed creates a fictional Meridian Components audit with approved electricity
 1. Create and confirm `kashyap.arnav2005@gmail.com` in Supabase Auth. Use a password that is never stored in this repository.
 2. Run `supabase/seed/jury_demo.sql` in the Supabase SQL Editor.
 3. Sign in at `/sign-in`.
-4. Upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence`.
+4. Upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence` or use `/app/import` to exercise the bulk monthly import flow.
 5. Walk through `/app/energy`, `/app/analysis`, `/app/findings`, `/app/recommendations`, and `/app/reports`.
 
 For the complete presentation sequence, see [JURY_DEMO_RUNBOOK.md](JURY_DEMO_RUNBOOK.md).
+
+For a plain-language explanation of every post-login tab, see [POST_LOGIN_WORKSPACE_GUIDE.md](POST_LOGIN_WORKSPACE_GUIDE.md).
 
 ## Vercel deployment
 
@@ -75,8 +90,8 @@ npm run dev
 ## Structure
 
 - `src/app`: public, auth, onboarding, and protected App Router routes plus server actions.
-- `src/components`: shared UI, navigation, theme, and review workflow forms.
-- `src/domain`: deterministic calculation and recommendation workflow rules.
+- `src/components`: shared UI, minimal post-login navigation, theme, data-entry, import, equipment, solar, and review workflow forms.
+- `src/domain`: deterministic calculation, monthly-period, CSV-import, solar-model, and recommendation workflow rules.
 - `src/lib/supabase`: SSR/browser clients and session refresh helpers.
 - `supabase/migrations`: schema, RLS, private bucket, Storage policies, and workflow hardening.
 - `supabase/seed`: fictional jury-demo data.
