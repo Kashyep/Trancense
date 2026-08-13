@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ArrowUpRight, CheckCircle2, FileCheck2, Sigma } from "lucide-react";
 import { GradientWaves } from "@/components/gradient-waves";
 import { PublicFooter, PublicHeader } from "@/components/public-header";
@@ -6,6 +7,10 @@ import { ActionLink } from "@/components/ui";
 import { pitchContent } from "@/content/pitch";
 import { productContent } from "@/content/product";
 import { siteContent } from "@/content/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 function Observatory() {
   return <figure className="observatory-card" aria-labelledby="observatory-title">

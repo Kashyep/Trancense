@@ -3,7 +3,7 @@
 ## Required configuration
 
 - Vercel environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_SERVER_ACTIONS_ALLOWED_ORIGINS`; `SUPABASE_SERVICE_ROLE_KEY` only if a future server-only task genuinely requires it.
-- Use Node 20 LTS in Vercel. Keep public variables non-secret.
+- Use Node 22 LTS in Vercel and locally. Keep public variables non-secret.
 - Apply `20260809000000_trancense_pilot.sql` then `20260809000001_security_hardening.sql` to a disposable Supabase project before any production project.
 - Add exact local, preview, and production `/auth/callback` and reset-password URLs to Supabase Auth Redirect URLs. Enable email confirmation, configure SMTP, password policy, CAPTCHA/rate limits, and supported session lifetime.
 - Verify both buckets are private and all RLS/Storage policies are present. Do not use service-role keys in browser code.

@@ -6,11 +6,11 @@ Trancense is decision-support software. These records are fictional and must not
 
 ## Demo account
 
-- Email: `kashyap.arnav2005@gmail.com`
-- Password: create or use the password configured in Supabase Auth
+- Email: a dedicated confirmed demo-only account, supplied through `app.demo_email` before running the seed
+- Password: create or use the password configured in Supabase Auth; never store it in the repository
 - Role: `owner`
 
-Never share the password in this file or commit it to GitHub. If another person uses a different Supabase account, replace the email in the seed process and create that user first.
+Never share the password in this file or commit it to GitHub. In the Supabase SQL Editor, run `select set_config('app.demo_email', 'confirmed-demo-account@example.com', false);` with the dedicated account before running `supabase/seed/jury_demo.sql`.
 
 ## Workspace
 

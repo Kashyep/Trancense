@@ -1,8 +1,9 @@
--- Jury-demo seed for a confirmed user with email kashyap.arnav2005@gmail.com.
+-- Jury-demo seed for a confirmed account selected through app.demo_email.
 -- Run after both migrations and after creating the demo Auth user.
 -- This creates fictional audit data only. Upload the matching fixture through /app/evidence.
 do $$
 declare
+  v_demo_email text := nullif(current_setting('app.demo_email', true), '');
   v_demo_user uuid;
   v_workspace_id uuid;
   v_site_id uuid;
@@ -11,9 +12,13 @@ declare
   v_boundary_id uuid;
   v_finding_id uuid;
 begin
-  select u.id into v_demo_user from auth.users u where u.email = 'kashyap.arnav2005@gmail.com' limit 1;
+  if v_demo_email is null then
+    raise exception 'Set app.demo_email to a confirmed demo account before running this seed.';
+  end if;
+
+  select u.id into v_demo_user from auth.users u where u.email = v_demo_email limit 1;
   if v_demo_user is null then
-    raise exception 'Create and confirm kashyap.arnav2005@gmail.com in Supabase Auth first.';
+    raise exception 'Create and confirm the app.demo_email account in Supabase Auth first.';
   end if;
 
   select w.id into v_workspace_id from public.workspaces w where w.created_by = v_demo_user and w.name = 'Meridian Components - Jury Demo' limit 1;

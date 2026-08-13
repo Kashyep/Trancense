@@ -3,6 +3,9 @@
 ## Local regression suite
 
 - `src/domain/upload-validation.test.ts`: mismatched MIME/extension/magic bytes, path-like names, binary CSV, and over-size rejection.
+- `src/lib/security.test.ts` and `src/app/auth/signout/route.test.ts`: same-origin POST enforcement for sign-out, including missing and malformed Origin headers.
+- `src/app/auth/callback/route.test.ts`: email confirmation clears the temporary session and routes to the dedicated verified-account screen.
+- `src/lib/site-url.test.ts`: canonical origin rejects non-local HTTP and strips unsafe path/query/fragment components before sitemap/robots/metadata use.
 - `src/domain/calculations.test.ts`: only approved normalized records enter totals; missing factor/payback states remain unavailable.
 - Static migration review: every workspace table enables RLS; security migration removes generic energy/audit-event writes and adds scope triggers.
 - Build inspection: `rg` checks for secret-like literals, raw HTML sinks, dynamic evaluation, and arbitrary server fetches.

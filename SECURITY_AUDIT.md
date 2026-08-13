@@ -70,7 +70,7 @@ Public routes: landing/auth/reset/contact and `/api/health`. Protected surfaces:
 - Attack preconditions: Browser access or cross-origin form/action attempt.
 - Evidence: No security headers were configured and action origin policy was implicit.
 - Impact: Larger XSS/clickjacking/CSRF blast radius.
-- Fix: Global CSP, frame blocking, nosniff, referrer, and permissions headers; same-origin action check and configured `allowedOrigins` environment option.
+- Fix: Global CSP, frame blocking, nosniff, referrer, and permissions headers; `poweredByHeader: false`; same-origin action check and configured `allowedOrigins` environment option.
 - Regression test: Production build succeeds; preview test plan verifies headers and cross-origin rejection.
 - Detection/monitoring: CSP/reporting endpoint is deferred until an owned reporting collector exists; monitor 4xx action-origin failures.
 - Status: mitigated; CSP uses `unsafe-inline` for current Next runtime compatibility, so nonce-based CSP is a pre-pilot improvement.
@@ -113,6 +113,19 @@ Public routes: landing/auth/reset/contact and `/api/health`. Protected surfaces:
 - Regression test: `src/domain/security-migration.test.ts` plus disposable-project transition tests.
 - Detection/monitoring: Alert on rejected transition triggers and review/verification events without expected actor role.
 - Status: fixed in migration; remote verification required before deployment.
+
+## [SEC-009] Sign-out POST lacked an explicit same-origin check
+
+- Severity: Low
+- CVSS 3.1: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N (4.3)
+- Affected component: `src/app/auth/signout/route.ts`
+- Attack preconditions: A signed-in user visits an attacker-controlled page that can submit a cross-site form.
+- Evidence: The route accepted any POST and immediately cleared the Supabase session. Browser cookie policy reduces the practical impact, but a route handler does not inherit Next Server Action origin protection.
+- Impact: A cross-site request could cause a user logout and disrupt an active audit session.
+- Fix: `assertRequestOrigin` compares the request URL origin with the browser `Origin` header before invoking `auth.signOut`; mismatches receive a generic no-store 403 response.
+- Regression test: `src/lib/security.test.ts` and `src/app/auth/signout/route.test.ts`.
+- Detection/monitoring: Monitor repeated 403 sign-out origin rejections without logging headers, cookies, or tokens.
+- Status: fixed.
 
 ## Deferred risks and limits
 

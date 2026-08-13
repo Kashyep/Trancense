@@ -18,7 +18,7 @@ const initial: ActionState = { ok: false, error: "" };
 
 function Feedback({ state }: { state: ActionState }) {
   if (state.error) return <p role="alert" className="mt-3 text-sm text-red-700">{state.error}</p>;
-  if (state.ok) return <p role="status" className="mt-3 text-sm text-[#816729]">Saved.</p>;
+  if (state.ok) return <p role="status" className="form-success mt-3 text-sm">Saved.</p>;
   return null;
 }
 

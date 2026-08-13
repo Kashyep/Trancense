@@ -8,11 +8,12 @@ This runbook is for a controlled five-minute demonstration using fictional data.
    - `supabase/migrations/20260809000000_trancense_pilot.sql`
    - `supabase/migrations/20260809000001_security_hardening.sql`
    - `supabase/migrations/20260810000000_jury_demo_workflow.sql`
-2. Create and confirm `kashyap.arnav2005@gmail.com` in Supabase Auth. Use the password you set for that account; do not store it in this repository.
-3. Run `supabase/seed/jury_demo.sql` in the Supabase SQL editor.
-4. Start the app with `npm run dev`.
-5. Sign in at `/sign-in` and upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence`.
-6. Confirm the demo account can access `/app`, `/app/energy`, `/app/analysis`, `/app/findings`, `/app/recommendations`, and `/app/reports`.
+2. Create and confirm a dedicated demo-only account in Supabase Auth. Use the password you set for that account; do not store it in this repository.
+3. In the same SQL Editor session, run `select set_config('app.demo_email', 'confirmed-demo-account@example.com', false);`, replacing the example with that account’s email.
+4. Run `supabase/seed/jury_demo.sql` in the Supabase SQL editor.
+5. Start the app with `npm run dev`.
+6. Sign in at `/sign-in` and upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence`.
+7. Confirm the demo account can access `/app`, `/app/energy`, `/app/analysis`, `/app/findings`, `/app/recommendations`, and `/app/reports`.
 
 ## Five-minute story
 

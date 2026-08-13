@@ -1,5 +1,21 @@
 import { headers } from "next/headers";
 
+export function isSameOriginRequest(requestUrl: string, origin: string | null): boolean {
+  if (!origin) return false;
+  try {
+    return new URL(requestUrl).origin === new URL(origin).origin;
+  } catch {
+    return false;
+  }
+}
+
+/** Route handlers do not inherit Server Action origin protection. */
+export function assertRequestOrigin(request: Request) {
+  if (!isSameOriginRequest(request.url, request.headers.get("origin"))) {
+    throw new Error("This request could not be verified.");
+  }
+}
+
 /** Server Actions are network endpoints. Reject cross-site form posts before mutation. */
 export async function assertActionOrigin() {
   const requestHeaders = await headers();

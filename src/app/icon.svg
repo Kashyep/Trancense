@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Trancense</title>
+  <rect width="64" height="64" rx="12" fill="#17191c"/>
+  <path d="M15 17h34v8H36v23h-8V25H15z" fill="#fff"/>
+  <path d="M43 41h7v7h-7z" fill="#d7b387"/>
+</svg>

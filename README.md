@@ -26,7 +26,7 @@ CSV imports retain the original file as private evidence. Supported columns incl
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
-   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` must match the application variable name. Keep `SUPABASE_SERVICE_ROLE_KEY` server-only; never expose it in browser code or commit it.
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` must match the application variable name. The current application does not require a service-role key; never expose one in browser code or commit it.
 3. Log in to the Supabase CLI, link the project, and apply migrations in timestamp order:
 
    ```bash
@@ -46,11 +46,17 @@ CSV imports retain the original file as private evidence. Supported columns incl
 
 The seed creates a fictional Meridian Components audit with approved electricity records, an excluded diesel record with a missing conversion factor, a reviewed finding, and a recommendation in review.
 
-1. Create and confirm `kashyap.arnav2005@gmail.com` in Supabase Auth. Use a password that is never stored in this repository.
-2. Run `supabase/seed/jury_demo.sql` in the Supabase SQL Editor.
-3. Sign in at `/sign-in`.
-4. Upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence` or use `/app/import` to exercise the bulk monthly import flow.
-5. Walk through `/app/energy`, `/app/analysis`, `/app/findings`, `/app/recommendations`, and `/app/reports`.
+1. Create and confirm a dedicated demo-only account in Supabase Auth. Use a password that is never stored in this repository.
+2. In the same Supabase SQL Editor session, set its email before running the seed:
+
+   ```sql
+   select set_config('app.demo_email', 'confirmed-demo-account@example.com', false);
+   ```
+
+3. Run `supabase/seed/jury_demo.sql` in the Supabase SQL Editor.
+4. Sign in at `/sign-in`.
+5. Upload `demo/fixtures/jury-energy-register.csv` at `/app/evidence` or use `/app/import` to exercise the bulk monthly import flow.
+6. Walk through `/app/energy`, `/app/analysis`, `/app/findings`, `/app/recommendations`, and `/app/reports`.
 
 For the complete presentation sequence, see [JURY_DEMO_RUNBOOK.md](JURY_DEMO_RUNBOOK.md).
 
@@ -103,7 +109,7 @@ All tenant records are workspace-scoped. RLS resolves access through `workspace_
 
 The P0 pilot limit is one workspace per account. Preserve existing data and direct expansion requests to `/contact`.
 
-Before deployment, follow [PRE_DEPLOYMENT_CHECKLIST.md](PRE_DEPLOYMENT_CHECKLIST.md), execute [SECURITY_TEST_PLAN.md](SECURITY_TEST_PLAN.md) against a disposable Supabase project, and review [SECURITY_AUDIT.md](SECURITY_AUDIT.md).
+Before deployment, follow [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md), [PRE_DEPLOYMENT_CHECKLIST.md](PRE_DEPLOYMENT_CHECKLIST.md), execute [SECURITY_TEST_PLAN.md](SECURITY_TEST_PLAN.md) against a disposable Supabase project, and review [SECURITY_AUDIT.md](SECURITY_AUDIT.md).
 
 ## Brand and content handoff
 

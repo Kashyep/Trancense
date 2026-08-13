@@ -1,11 +1,29 @@
 import { AuthForm } from "@/components/auth-form";
 import { AuthLayout } from "@/components/auth-layout";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { currentUser } from "@/lib/supabase/server";
+import { getWorkspaceContext } from "@/lib/workspace";
+
+export const metadata: Metadata = { title: "Sign in", robots: { index: false, follow: false } };
 
 type SignInProps = {
   searchParams: Promise<{ verified?: string; error?: string }>;
 };
 
 export default async function SignIn({ searchParams }: SignInProps) {
+  let authenticated = false;
+  try {
+    await currentUser();
+    authenticated = true;
+  } catch {
+    // Sign-in remains available when there is no usable session.
+  }
+  if (authenticated) {
+    const context = await getWorkspaceContext();
+    redirect(context?.audit ? "/app" : "/onboarding");
+  }
+
   const params = await searchParams;
   const notice = params.verified === "1"
     ? "Email verified. Sign in to continue."

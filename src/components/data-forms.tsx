@@ -30,7 +30,7 @@ export function EnergyForm({ workspaceId, auditId, boundaryId }: { workspaceId: 
     </div>
     <details className="mt-5 rounded-xl border border-[var(--border)] p-4"><summary className="cursor-pointer font-semibold">Add cost, provider, or notes <span className="font-normal muted">(optional)</span></summary><div className="mt-4 grid gap-4 sm:grid-cols-2"><label className="form-label mt-0">Total cost (INR)<input name="cost" type="number" min="0" step="any" className="form-input" /></label><label className="form-label mt-0">Provider / source<input name="sourceProvider" className="form-input" placeholder="e.g. Tata Power" /></label></div><label className="form-label">Notes<textarea name="notes" className="form-textarea" /></label></details>
     <Button className="mt-5" disabled={pending}>{pending ? "Saving…" : "Save monthly entry"}</Button>
-    {state.ok && <p role="status" className="mt-3 text-sm text-[#816729]">Saved as a draft for review.</p>}
+    {state.ok && <p role="status" className="form-success mt-3 text-sm">Saved as a draft for review.</p>}
     {state.error && <p role="alert" className="field-error mt-3">{state.error}</p>}
   </form>;
 }

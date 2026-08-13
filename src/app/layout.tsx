@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
 import { Exo_2, Kanit, Open_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { canonicalOrigin } from "@/lib/site-url";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Trancense — evidence-first energy audits",
+  metadataBase: canonicalOrigin(),
+  title: { default: "Trancense — evidence-first energy audits", template: "%s | Trancense" },
   description: "Traceable energy-audit workspace for Indian audit teams.",
+  applicationName: "Trancense",
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    siteName: "Trancense",
+    title: "Trancense — evidence-first energy audits",
+    description: "Traceable energy-audit workspace for Indian audit teams.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Trancense — evidence-first energy audits",
+    description: "Traceable energy-audit workspace for Indian audit teams.",
+  },
 };
 
 const exo = Exo_2({ subsets: ["latin"], variable: "--font-exo", display: "swap" });
